@@ -1,9 +1,9 @@
 #include "battery.h"
 #include "functions.h"
 #include "lemonOutput.h"
-#include <iostream>
+#include <chrono>
 #include <string>
-#include <sys/epoll.h>
+#include <thread>
 
 const char *STATUS_FILE = "/sys/class/power_supply/BAT0/status";
 const char *CAPACITY_FILE = "/sys/class/power_supply/BAT0/capacity";
@@ -12,10 +12,6 @@ int Battery::capacity = -1;
 std::string Battery::status = "Unknown";
 
 Battery::Battery() {
-  if (epoll_fd == -1) {
-    std::cerr << "Failed to create epoll instance." << std::endl;
-  }
-
   status = readFile(STATUS_FILE);
   capacity = readIntFile(CAPACITY_FILE);
 
@@ -23,22 +19,24 @@ Battery::Battery() {
   monitor();
 }
 
-void Battery::monitor() {
-  while (true) {
-    struct epoll_event event;
-    int nfsd = epoll_wait(epoll_fd, &event, 1, POLL_INTERVAL * 1000);
+void Battery::monitor(const std::atomic<bool> &running) {
+  while (running) {
+    if (!running)
+      break;
 
     int new_capacity = readIntFile(CAPACITY_FILE);
     std::string new_status = readFile(STATUS_FILE);
 
-    if (capacity != new_capacity) {
+    if (capacity != new_capacity || status != new_status) {
       capacity = new_capacity;
-      lemonOutput();
-    }
-    if (status != new_status) {
       status = new_status;
       lemonOutput();
     }
+
+    std::this_thread::sleep_for(std::chrono::seconds(POLL_INTERVAL));
+
+    if (!running)
+      break;
   }
 }
 

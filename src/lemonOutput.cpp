@@ -1,8 +1,10 @@
 #include "lemonOutput.h"
 #include "battery.h"
+#include "brightness.h"
 #include <iostream>
 #include <string>
 
-std::string lemonDataGather() { return Battery::getBattery(); }
-
-void lemonOutput() { std::cout << "%{r}" << lemonDataGather() << std::endl; }
+void lemonOutput() {
+  std::cout << "%{r}" << Battery::getBattery() << " "
+            << Brightness::getBrightness() << std::endl;
+}

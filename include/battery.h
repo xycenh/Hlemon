@@ -1,6 +1,7 @@
 #ifndef BATTERY_H
 #define BATTERY_H
 
+#include <atomic>
 #include <string>
 #include <sys/epoll.h>
 
@@ -8,14 +9,12 @@
 
 class Battery {
 private:
-  int epoll_fd = epoll_create1(0);
   static int capacity;
   static std::string status;
 
 public:
   Battery();
-  void monitor();
+  void monitor(const std::atomic<bool> &running = true);
   static std::string getBattery();
 };
-
 #endif // !BATTERY_H
