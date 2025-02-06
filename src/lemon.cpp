@@ -1,17 +1,13 @@
 #include "battery.h"
 #include "brightness.h"
-#include <atomic>
 #include <csignal>
+#include <cstdlib>
 #include <iostream>
 #include <thread>
 #include <vector>
 
-std::atomic<bool> keepRunning(true);
-
 void signalHandler(int signum) {
-  std::cout << "Received signal " << signum << ". Shutting down..."
-            << std::endl;
-  keepRunning = false;
+  exit(signum);
 }
 
 int main() {
@@ -26,12 +22,10 @@ int main() {
 
   threads.emplace_back([&]() {
     Battery battery;
-    battery.monitor(keepRunning);
   });
 
   threads.emplace_back([&]() {
     Brightness brightness;
-    brightness.startMonitoring(keepRunning);
   });
 
   // Wait for threads to complete

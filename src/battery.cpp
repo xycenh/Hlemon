@@ -19,10 +19,8 @@ Battery::Battery() {
   monitor();
 }
 
-void Battery::monitor(const std::atomic<bool> &running) {
-  while (running) {
-    if (!running)
-      break;
+void Battery::monitor() {
+    while (true) {
 
     int new_capacity = readIntFile(CAPACITY_FILE);
     std::string new_status = readFile(STATUS_FILE);
@@ -34,12 +32,15 @@ void Battery::monitor(const std::atomic<bool> &running) {
     }
 
     std::this_thread::sleep_for(std::chrono::seconds(POLL_INTERVAL));
-
-    if (!running)
-      break;
   }
 }
 
 std::string Battery::getBattery() {
-  return status + ' ' + std::to_string(capacity) + '%';
+    std::string icon = "";
+    if      (status == "Not"        )  icon = "ADP";
+    else if (status == "Discharging")  icon = "BAT";
+    else if (status == "Charging"   )  icon = "CHA";
+    else if (status == "Full"       )  icon = "FUL";
+    else                               icon = "UNK";
+    return icon + ' ' + std::to_string(capacity) + '%';
 }

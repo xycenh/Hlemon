@@ -14,7 +14,7 @@ private:
 
 public:
   Battery();
-  void monitor(const std::atomic<bool> &running = true);
+  void monitor();
   static std::string getBattery();
 };
 #endif // !BATTERY_H

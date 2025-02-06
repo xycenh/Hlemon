@@ -1,6 +1,7 @@
 #include "brightness.h"
 #include "functions.h"
 #include "lemonOutput.h"
+#include <climits>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
@@ -20,6 +21,7 @@ Brightness::Brightness() : udev(nullptr), mon(nullptr), isMonitoring(false) {
   max_brightness = readIntFile(MAX_BRIGHTNESS_FILE);
   actual_brightness = readIntFile(ACTUAL_BRIGHTNESS_FILE);
   lemonOutput();
+  startMonitoring();
 }
 
 Brightness::~Brightness() { stopMonitoring(); }
@@ -46,17 +48,11 @@ void Brightness::setupMonitor() {
   fds[0].events = POLLIN;
 }
 
-void Brightness::monitorLoop(std::atomic<bool> &running) {
-  while (running) {
-    if (!running)
-      break;
+void Brightness::monitorLoop() {
+  while (true) {
 
     int timeout_ms = 500; // Reduced timeout
     int ret = poll(fds, 1, timeout_ms);
-
-    if (!running)
-      break;
-
     if (ret > 0 && (fds[0].revents & POLLIN)) {
       struct udev_device *dev = udev_monitor_receive_device(mon);
       if (dev) {
@@ -80,14 +76,11 @@ void Brightness::cleanup() {
   }
 }
 
-void Brightness::startMonitoring(std::atomic<bool> &running) {
-  if (isMonitoring)
-    return;
+void Brightness::startMonitoring() {
   try {
     initializeUdev();
     setupMonitor();
-    isMonitoring = true;
-    monitorLoop(running);
+    monitorLoop();
   } catch (const std::exception &e) {
     std::cerr << "Error in monitoring: " << e.what() << std::endl;
     stopMonitoring();
@@ -99,6 +92,8 @@ void Brightness::stopMonitoring() {
   cleanup();
 }
 
-int Brightness::getBrightness() {
-  return ((actual_brightness + 10) * 100) / max_brightness;
+std::string Brightness::getBrightness() {
+    actual_brightness = readIntFile(ACTUAL_BRIGHTNESS_FILE);
+    max_brightness = readIntFile(MAX_BRIGHTNESS_FILE);
+    return "BRI " + std::to_string(((actual_brightness + 10) * 100) / max_brightness) + "%";
 }

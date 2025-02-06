@@ -1,16 +1,16 @@
 #ifndef BRIGHTNESS_H
 #define BRIGHTNESS_H
-#include <atomic>
 #include <libudev.h>
 #include <poll.h>
+#include <string>
 
 class Brightness {
 public:
   Brightness();
   ~Brightness();
-  void startMonitoring(std::atomic<bool> &running);
+  void startMonitoring();
   void stopMonitoring();
-  static int getBrightness();
+  static std::string getBrightness();
 
 private:
   struct udev *udev;
@@ -22,7 +22,7 @@ private:
 
   void initializeUdev();
   void setupMonitor();
-  void monitorLoop(std::atomic<bool> &running);
+  void monitorLoop();
   void cleanup();
 };
 #endif // BRIGHTNESS_H
