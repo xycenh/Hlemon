@@ -4,5 +4,12 @@ project(lemon)
 include_directories(include)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(lemon src/lemon.cpp src/battery.cpp src/functions.cpp src/lemonOutput.cpp src/brightness.cpp)
+add_executable(lemon 
+               src/lemon.cpp 
+               src/battery.cpp 
+               src/functions.cpp 
+               src/lemonOutput.cpp 
+               src/brightness.cpp
+               src/workspaces.cpp
+             )
 target_link_libraries(lemon udev)

@@ -6,23 +6,23 @@
 
 class Brightness {
 public:
-  Brightness();
-  ~Brightness();
-  void startMonitoring();
-  void stopMonitoring();
-  static std::string getBrightness();
+    static std::string getBrightness();
+    Brightness();
+    ~Brightness();
 
 private:
-  struct udev *udev;
-  struct udev_monitor *mon;
-  struct pollfd fds[1];
-  bool isMonitoring;
-  static int max_brightness;
-  static int actual_brightness;
+    void startMonitoring();
+    void stopMonitoring();
+    struct udev *udev;
+    struct udev_monitor *mon;
+    struct pollfd fds[1];
+    bool isMonitoring;
+    static int max_brightness;
+    static int actual_brightness;
 
-  void initializeUdev();
-  void setupMonitor();
-  void monitorLoop();
-  void cleanup();
+    void initializeUdev();
+    void setupMonitor();
+    void monitorLoop();
+    void cleanup();
 };
 #endif // BRIGHTNESS_H

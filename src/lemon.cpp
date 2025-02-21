@@ -1,5 +1,6 @@
 #include "battery.h"
 #include "brightness.h"
+#include "workspaces.h"
 #include <csignal>
 #include <cstdlib>
 #include <iostream>
@@ -26,6 +27,10 @@ int main() {
 
   threads.emplace_back([&]() {
     Brightness brightness;
+  });
+
+  threads.emplace_back([&]() {
+      Workspaces workspaces;
   });
 
   // Wait for threads to complete
