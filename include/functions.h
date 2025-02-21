@@ -3,7 +3,7 @@
 
 #include <string>
 
-std::string exec(const char *);
+void exec(const char *);
 std::string readFile(const char *);
 int readIntFile(const char *);
 

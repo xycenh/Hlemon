@@ -2,18 +2,19 @@
 #include <fstream>
 #include <iostream>
 
-std::string exec(const char *cmd) {
+void exec(const char *cmd) {
   std::string result;
   FILE *pipe = popen(cmd, "r");
-  if (!pipe)
-    return "Error in command";
-
-  char ch;
-  while (fread(&ch, sizeof(ch), 1, pipe))
-    result += ch;
+  if (!pipe) {
+    std::cerr << "Failed to execute command." << std::endl;
+    return;
+  }
+  // char ch;
+  // while (fread(&ch, sizeof(ch), 1, pipe))
+  //   result += ch;
 
   pclose(pipe);
-  return result;
+  // return result;
 }
 
 std::string readFile(const char *path) {

@@ -62,8 +62,13 @@ void Workspaces::checkWorkspaceStatus(const std::vector<std::string> &workspaces
         char status = ws[0];
         std::string name = ws.substr(1);
 
-        if (status == 'O' || status == 'o' || status == 'F') {
-        shownWorkspaces.push_back(name);
+        if (status == 'O' || status == 'F') {
+            name = "%{A:sh -c \"bspc desktop -f \'" + name + "\'\":}%{B#333333}%{O10}" + name + "%{O10}%{B-}%{A}";
+            shownWorkspaces.push_back(name);
+        }
+        else if (status == 'o') {
+            name = "%{A:sh -c \"bspc desktop -f \'" + name + "\'\":}%{O2}" + name + "%{O2}%{A}";
+            shownWorkspaces.push_back(name);
         }
     }
 
