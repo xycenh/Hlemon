@@ -2,6 +2,7 @@
 #include "brightness.h"
 #include "workspaces.h"
 #include "functions.h"
+#include "clock.h"
 #include <csignal>
 #include <cstdlib>
 #include <iostream>
@@ -52,6 +53,10 @@ int main() {
 
     threads.emplace_back([&]() {
         Workspaces workspaces;
+    });
+
+    threads.emplace_back([&](){
+	displayTime();
     });
 
 

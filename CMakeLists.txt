@@ -11,5 +11,12 @@ add_executable(lemon
                src/lemonOutput.cpp 
                src/brightness.cpp
                src/workspaces.cpp
+	       src/clock.cpp
              )
 target_link_libraries(lemon udev)
+
+
+# Installation rules
+install(TARGETS lemon DESTINATION /usr/bin)
+install(DIRECTORY include/ DESTINATION /usr/include/lemon)
+# install(FILES config/lemon.conf DESTINATION /etc/lemon)

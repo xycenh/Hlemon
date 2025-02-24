@@ -2,6 +2,7 @@
 #include "battery.h"
 #include "brightness.h"
 #include "workspaces.h"
+#include "clock.h"
 #include <iostream>
 
 void lemonOutput() {
@@ -9,6 +10,7 @@ void lemonOutput() {
             << Workspaces::getWorkspaces()
             << "%{r}"
             << Brightness::getBrightness() << " | "
-            << Battery::getBattery()
+            << Battery::getBattery() << " | "
+	    << getClock() << " "
             << std::endl;
 }
