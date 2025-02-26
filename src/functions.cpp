@@ -1,20 +1,23 @@
 #include "functions.h"
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <algorithm>
+#include <cctype>
 
-void exec(const char *cmd) {
+std::string exec(const char *cmd) {
   std::string result;
   FILE *pipe = popen(cmd, "r");
   if (!pipe) {
     std::cerr << "Failed to execute command." << std::endl;
-    return;
+    return "";
   }
-  // char ch;
-  // while (fread(&ch, sizeof(ch), 1, pipe))
-  //   result += ch;
+  char ch;
+  while (fread(&ch, sizeof(ch), 1, pipe))
+    result += ch;
 
   pclose(pipe);
-  // return result;
+  return result;
 }
 
 std::string readFile(const char *path) {
@@ -39,4 +42,16 @@ int readIntFile(const char *path) {
     file.close();
   }
   return value;
+}
+
+
+std::string trim(const std::string& str) {
+    // Find the first non-whitespace character
+    auto start = std::find_if_not(str.begin(), str.end(), ::isspace);
+
+    // Find the last non-whitespace character
+    auto end = std::find_if_not(str.rbegin(), str.rend(), ::isspace).base();
+
+    // Return the trimmed string
+    return (start < end) ? std::string(start, end) : std::string();
 }

@@ -3,8 +3,9 @@
 
 #include <string>
 
-void exec(const char *);
+std::string exec(const char *);
 std::string readFile(const char *);
 int readIntFile(const char *);
+std::string trim(const std::string&);
 
 #endif // !DEBUG

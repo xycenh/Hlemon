@@ -1,5 +1,7 @@
 #include "battery.h"
 #include "brightness.h"
+#include "volume.h"
+#include "mic.h"
 #include "workspaces.h"
 #include "functions.h"
 #include "clock.h"
@@ -12,24 +14,6 @@
 void signalHandler(int signum) {
   exit(signum);
 }
-
-// void lemonbarHandler() {
-//     FILE *pipe = popen("./lemon | lemonbar -f 'monospace' -B '#000000'", "r");
-//     if (!pipe) {
-//         std::cerr << "Failed to start lemonbar" << std::endl;
-//         return;
-//     }
-
-//     char command[256];
-//     while (fgets(command, sizeof(command), pipe)) {
-//         std::string cmdStr(command);
-//         if (cmdStr.find("bspc") != std::string::npos) { // ✅ Only allow bspc commands
-//             system(cmdStr.c_str());
-//         }
-//     }
-
-//     pclose(pipe);
-// }
 
 int main() {
     struct sigaction sigIntHandler;
@@ -56,8 +40,16 @@ int main() {
     });
 
     threads.emplace_back([&](){
-	displayTime();
+					displayTime();
     });
+
+    threads.emplace_back([&](){
+				Volume volume;
+    });
+
+		threads.emplace_back([&](){
+				Mic mic;
+		});
 
 
     // Wait for threads to complete

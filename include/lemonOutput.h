@@ -5,5 +5,6 @@
 
 std::string lemonDataGather();
 void lemonOutput();
+void lemonOutputWrapper(int);
 
 #endif // LEMONOUTPUT_H
