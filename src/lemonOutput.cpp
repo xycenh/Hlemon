@@ -11,16 +11,11 @@ void lemonOutput() {
   std::cout << "%{l}" << " "
             << Workspaces::getWorkspaces()
             << "%{r}"
-						<< " | "
-            << Volume::getVolume() << " | "
-						<< Mic::getMicVolume() << " | "
-            << Brightness::getBrightness() << " | "
-            << Battery::getBattery() << " | "
-      	    << getClock() << " "
+						/*<< "%{F#777777}|%{F-}"*/
+            << Volume::getVolume() << "%{F#777777}|%{F-}"
+						<< Mic::getMicVolume() << "%{F#777777}|%{F-}"
+            << Brightness::getBrightness() << "%{F#777777}|%{F-}"
+            << Battery::getBattery() << "%{F#777777}|%{F-}"
+      	    << getClock() << ""
             << std::endl;
 }
-
-void lemonOutputWrapper(int value) {
-    lemonOutput(); // Call the original function
-}
-

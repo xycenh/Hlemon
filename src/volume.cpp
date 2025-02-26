@@ -101,6 +101,28 @@ void Volume::monitor_volume_changes() {
 
 // Get current volume or mute state as a string
 std::string Volume::getVolume() {
-    return Volume::is_muted ? "VOL mut" : "VOL " + std::to_string(Volume::current_percent) + "%";
+		std::string icon = "";
+		std::string color = "#ffffff";
+
+
+		if (Volume::is_muted) {
+				color = "#ff8888"; 
+		}
+
+		if (Volume::current_percent == 0) {
+				icon = " ";
+				color = "#ff8888";
+		} else if (Volume::current_percent< 15) {
+				icon = " ";
+		} else if (Volume::current_percent < 80) {
+				icon = " ";
+		} else if (Volume::current_percent < 100) {
+				icon = " ";
+		} else if (Volume::current_percent == 100) {
+				icon = " ";
+		}
+		std::string format = " %{F" + color + "}" + icon + " " + std::to_string(Volume::current_percent) + "%" + " %{F-}";
+    /*return Volume::is_muted ? icon : icon + " " + std::to_string(Volume::current_percent) + "%";*/
+    return format; 
 }
 

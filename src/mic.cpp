@@ -69,7 +69,7 @@ void Mic::monitor_mic_changes() {
     snd_mixer_selem_get_capture_switch(elem, SND_MIXER_SCHN_FRONT_LEFT, &last_mute_state);
     Mic::is_muted = (last_mute_state == 0);
 
-    std::cout << "Mic Volume: " << vol_percent << "%, Muted: " << (Mic::is_muted ? "Yes" : "No") << std::endl;
+    /*std::cout << "Mic Volume: " << vol_percent << "%, Muted: " << (Mic::is_muted ? "Yes" : "No") << std::endl;*/
 
     // Set up polling for mixer events
     struct pollfd fds[1];
@@ -80,7 +80,7 @@ void Mic::monitor_mic_changes() {
         return;
     }
 
-    std::cout << "Monitoring microphone changes... Press Ctrl+C to exit" << std::endl;
+    /*std::cout << "Monitoring microphone changes... Press Ctrl+C to exit" << std::endl;*/
 
     // Main event loop
     while (true) {
@@ -112,8 +112,8 @@ void Mic::monitor_mic_changes() {
                 Mic::current_percent = vol_percent;
                 Mic::is_muted = muted;
 
-                std::cout << "Mic Volume changed: " << Mic::current_percent << "%, Muted: " 
-                          << (Mic::is_muted ? "Yes" : "No") << std::endl;
+                /*std::cout << "Mic Volume changed: " << Mic::current_percent << "%, Muted: " */
+                          /*<< (Mic::is_muted ? "Yes" : "No") << std::endl;*/
                 
                 lemonOutput(); // Call lemonOutput function to update status bar
 
@@ -124,11 +124,23 @@ void Mic::monitor_mic_changes() {
 
     // Clean up
     snd_mixer_close(mixer);
-    std::cout << "\nMonitoring stopped." << std::endl;
+    /*std::cout << "\nMonitoring stopped." << std::endl;*/
 }
 
 // Get current microphone volume as a string
 std::string Mic::getMicVolume() {
-    return Mic::is_muted ? "MIC mut" : "MIC " + std::to_string(Mic::current_percent) + "%";
+		std::string icon = "";
+		std::string color = "#ffffff";
+
+		if (Mic::is_muted) {
+				color = "#ff8888"; 
+				icon = "";
+		} else {
+				icon = "";
+				color = "#ffffff";
+		}
+		std::string format = " %{F" + color + "}" + icon + " " + std::to_string(Mic::current_percent) + "%" + " %{F-}";
+    /*return Volume::is_muted ? icon : icon + " " + std::to_string(Volume::current_percent) + "%";*/
+    return format; 
 }
 

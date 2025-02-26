@@ -95,5 +95,24 @@ void Brightness::stopMonitoring() {
 std::string Brightness::getBrightness() {
     actual_brightness = readIntFile(ACTUAL_BRIGHTNESS_FILE);
     max_brightness = readIntFile(MAX_BRIGHTNESS_FILE);
-    return "BRI " + std::to_string(((actual_brightness + 10) * 100) / max_brightness) + "%";
+		int brightness = ((actual_brightness + 10) * 100) / max_brightness;
+		std::string icon = "";
+		std::string color = "";
+		
+		if (brightness < 20) {
+				icon = "";
+				color = "#888888";
+		} else if (brightness < 70) {
+				icon = "";
+				color = "#dddddd";
+		} else if (brightness < 100) {
+				icon = "";
+				color = "#ffffff";
+		} else if (brightness == 100) {
+				icon = "";
+				color = "#ffff88";
+		}
+
+		std::string format = " %{F" + color + "}" + icon + " " + std::to_string(brightness) + "% %{F-}";
+    return format;
 }
