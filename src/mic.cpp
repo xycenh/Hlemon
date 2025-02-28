@@ -69,35 +69,21 @@ void Mic::monitor_mic_changes() {
     snd_mixer_selem_get_capture_switch(elem, SND_MIXER_SCHN_FRONT_LEFT, &last_mute_state);
     Mic::is_muted = (last_mute_state == 0);
 
+	// Check microphone volume
+	long current_volume = 0;
+	snd_mixer_selem_get_capture_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, &current_volume);
+	vol_percent = static_cast<int>((current_volume - min) * 100 / (max - min));
+
+	// Check mute state
+	int current_mute_state = 0;
+	snd_mixer_selem_get_capture_switch(elem, SND_MIXER_SCHN_FRONT_LEFT, &current_mute_state);
+	bool muted = (current_mute_state == 0);
 
 
-
-		// will goooo hereeeee
-
-		// Check microphone volume
-		long current_volume = 0;
-		snd_mixer_selem_get_capture_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, &current_volume);
-		vol_percent = static_cast<int>((current_volume - min) * 100 / (max - min));
-
-		// Check mute state
-		int current_mute_state = 0;
-		snd_mixer_selem_get_capture_switch(elem, SND_MIXER_SCHN_FRONT_LEFT, &current_mute_state);
-		bool muted = (current_mute_state == 0);
-
-
-		Mic::current_percent = vol_percent;
-		Mic::is_muted = muted;
-		updateLemonbar(lemonOutput());
-		last_volume = current_volume;
-
-
-
-
-
-
-
-
-
+	Mic::current_percent = vol_percent;
+	Mic::is_muted = muted;
+	updateLemonbar(lemonOutput());
+	last_volume = current_volume;
 
     // Set up polling for mixer events
     struct pollfd fds[1];
