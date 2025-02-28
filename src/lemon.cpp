@@ -1,5 +1,6 @@
 #include "battery.h"
 #include "brightness.h"
+#include "lemonOutput.h"
 #include "volume.h"
 #include "mic.h"
 #include "workspaces.h"
@@ -23,6 +24,7 @@ int main() {
     sigaction(SIGINT, &sigIntHandler, NULL);
     sigaction(SIGTERM, &sigIntHandler, NULL);
 
+    initLemonbar();
     std::vector<std::thread> threads;
 
     // threads.emplace_back(lemonbarHandler);

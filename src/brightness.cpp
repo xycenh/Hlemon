@@ -20,7 +20,7 @@ int Brightness::actual_brightness = -1;
 Brightness::Brightness() : udev(nullptr), mon(nullptr), isMonitoring(false) {
   max_brightness = readIntFile(MAX_BRIGHTNESS_FILE);
   actual_brightness = readIntFile(ACTUAL_BRIGHTNESS_FILE);
-  lemonOutput();
+  updateLemonbar(lemonOutput());
   startMonitoring();
 }
 
@@ -56,7 +56,7 @@ void Brightness::monitorLoop() {
     if (ret > 0 && (fds[0].revents & POLLIN)) {
       struct udev_device *dev = udev_monitor_receive_device(mon);
       if (dev) {
-        lemonOutput();
+        updateLemonbar(lemonOutput());
         udev_device_unref(dev);
       }
     }
@@ -98,21 +98,17 @@ std::string Brightness::getBrightness() {
 		int brightness = ((actual_brightness + 10) * 100) / max_brightness;
 		std::string icon = "";
 		std::string color = "";
-		
+
 		if (brightness < 20) {
 				icon = "";
-				color = "#888888";
 		} else if (brightness < 70) {
 				icon = "";
-				color = "#dddddd";
 		} else if (brightness < 100) {
 				icon = "";
-				color = "#ffffff";
 		} else if (brightness == 100) {
 				icon = "";
-				color = "#ffff88";
 		}
 
-		std::string format = " %{F" + color + "}" + icon + " " + std::to_string(brightness) + "% %{F-}";
+		std::string format = " " + icon + " " + std::to_string(brightness) + "% ";
     return format;
 }

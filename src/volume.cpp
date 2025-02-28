@@ -1,5 +1,4 @@
 #include "volume.h"
-#include <signal.h>
 #include <cerrno>
 #include <cstring>
 #include "lemonOutput.h"
@@ -61,6 +60,34 @@ void Volume::monitor_volume_changes() {
     Volume::current_percent = static_cast<int>((last_volume - min) * 100 / (max - min));
     Volume::is_muted = (last_mute_state == 0);
 
+
+
+
+
+		long current_volume = 0;
+		int current_mute_state = 0;
+		snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, &current_volume);
+		snd_mixer_selem_get_playback_switch(elem, SND_MIXER_SCHN_FRONT_LEFT, &current_mute_state);
+
+		int last_percent = static_cast<int>((last_volume - min) * 100 / (max - min));
+		Volume::current_percent = static_cast<int>((current_volume - min) * 100 / (max - min));
+		Volume::is_muted = (current_mute_state == 0);
+
+		updateLemonbar(lemonOutput());
+		last_volume = current_volume;
+		last_mute_state = current_mute_state;
+
+
+
+
+
+
+
+
+
+
+
+
     struct pollfd fds[1];
     if (snd_mixer_poll_descriptors(mixer, fds, 1) < 0) {
         std::cerr << "Failed to get poll descriptors" << std::endl;
@@ -89,7 +116,7 @@ void Volume::monitor_volume_changes() {
             Volume::is_muted = (current_mute_state == 0);
 
             if (current_volume != last_volume || current_mute_state != last_mute_state) {
-                lemonOutput();
+                updateLemonbar(lemonOutput());
                 last_volume = current_volume;
                 last_mute_state = current_mute_state;
             }
@@ -102,27 +129,19 @@ void Volume::monitor_volume_changes() {
 // Get current volume or mute state as a string
 std::string Volume::getVolume() {
 		std::string icon = "";
-		std::string color = "#ffffff";
-
 
 		if (Volume::is_muted) {
-				color = "#ff8888"; 
-		}
-
-		if (Volume::current_percent == 0) {
-				icon = " ";
-				color = "#ff8888";
+				icon = "";
 		} else if (Volume::current_percent< 15) {
 				icon = " ";
 		} else if (Volume::current_percent < 80) {
 				icon = " ";
 		} else if (Volume::current_percent < 100) {
-				icon = " ";
+				icon = "";
 		} else if (Volume::current_percent == 100) {
-				icon = " ";
+				icon = "";
 		}
-		std::string format = " %{F" + color + "}" + icon + " " + std::to_string(Volume::current_percent) + "%" + " %{F-}";
+		std::string format = " " + icon + " " + std::to_string(Volume::current_percent) + "%" + " ";
     /*return Volume::is_muted ? icon : icon + " " + std::to_string(Volume::current_percent) + "%";*/
-    return format; 
+    return format;
 }
-

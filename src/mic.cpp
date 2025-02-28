@@ -69,7 +69,35 @@ void Mic::monitor_mic_changes() {
     snd_mixer_selem_get_capture_switch(elem, SND_MIXER_SCHN_FRONT_LEFT, &last_mute_state);
     Mic::is_muted = (last_mute_state == 0);
 
-    /*std::cout << "Mic Volume: " << vol_percent << "%, Muted: " << (Mic::is_muted ? "Yes" : "No") << std::endl;*/
+
+
+
+		// will goooo hereeeee
+
+		// Check microphone volume
+		long current_volume = 0;
+		snd_mixer_selem_get_capture_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, &current_volume);
+		vol_percent = static_cast<int>((current_volume - min) * 100 / (max - min));
+
+		// Check mute state
+		int current_mute_state = 0;
+		snd_mixer_selem_get_capture_switch(elem, SND_MIXER_SCHN_FRONT_LEFT, &current_mute_state);
+		bool muted = (current_mute_state == 0);
+
+
+		Mic::current_percent = vol_percent;
+		Mic::is_muted = muted;
+		updateLemonbar(lemonOutput());
+		last_volume = current_volume;
+
+
+
+
+
+
+
+
+
 
     // Set up polling for mixer events
     struct pollfd fds[1];
@@ -79,8 +107,6 @@ void Mic::monitor_mic_changes() {
         snd_mixer_close(mixer);
         return;
     }
-
-    /*std::cout << "Monitoring microphone changes... Press Ctrl+C to exit" << std::endl;*/
 
     // Main event loop
     while (true) {
@@ -111,12 +137,7 @@ void Mic::monitor_mic_changes() {
             if (current_volume != last_volume || muted != Mic::is_muted) {
                 Mic::current_percent = vol_percent;
                 Mic::is_muted = muted;
-
-                /*std::cout << "Mic Volume changed: " << Mic::current_percent << "%, Muted: " */
-                          /*<< (Mic::is_muted ? "Yes" : "No") << std::endl;*/
-                
-                lemonOutput(); // Call lemonOutput function to update status bar
-
+                updateLemonbar(lemonOutput());
                 last_volume = current_volume;
             }
         }
@@ -124,23 +145,20 @@ void Mic::monitor_mic_changes() {
 
     // Clean up
     snd_mixer_close(mixer);
-    /*std::cout << "\nMonitoring stopped." << std::endl;*/
 }
 
 // Get current microphone volume as a string
 std::string Mic::getMicVolume() {
 		std::string icon = "";
-		std::string color = "#ffffff";
+		std::string format = "";
 
 		if (Mic::is_muted) {
-				color = "#ff8888"; 
 				icon = "";
+				format = " " + icon + " ";
 		} else {
 				icon = "";
-				color = "#ffffff";
+				format = " " + icon + " " + std::to_string(Mic::current_percent) + "% ";
 		}
-		std::string format = " %{F" + color + "}" + icon + " " + std::to_string(Mic::current_percent) + "%" + " %{F-}";
-    /*return Volume::is_muted ? icon : icon + " " + std::to_string(Volume::current_percent) + "%";*/
-    return format; 
+		/*std::string format = " %{F" + color + "}" + icon + " " + std::to_string(Mic::current_percent) + "%" + " %{F-}";*/
+    return format;
 }
-

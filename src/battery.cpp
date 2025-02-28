@@ -15,7 +15,7 @@ Battery::Battery() {
   status = readFile(STATUS_FILE);
   capacity = readIntFile(CAPACITY_FILE);
 
-  lemonOutput();
+  updateLemonbar(lemonOutput());
   monitor();
 }
 
@@ -27,7 +27,7 @@ void Battery::monitor() {
     if (capacity != new_capacity || status != new_status) {
       capacity = new_capacity;
       status = new_status;
-      lemonOutput();
+      updateLemonbar(lemonOutput());
     }
 
     std::this_thread::sleep_for(std::chrono::seconds(POLL_INTERVAL));

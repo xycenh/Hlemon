@@ -24,7 +24,7 @@ void Workspaces::exec() {
     }
     std::vector<std::string> workspaces = parseString(workspaceEvent);
     checkWorkspaceStatus(workspaces);
-    lemonOutput();
+    updateLemonbar(lemonOutput());
   }
   pclose(pipe);
 }

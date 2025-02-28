@@ -1,8 +1,9 @@
 #include "clock.h"
+#include "lemonOutput.h"
 
 void displayTime() {
 	while(true) {
-		lemonOutput();
+		updateLemonbar(lemonOutput());
 	    auto now = std::chrono::system_clock::now();
 	    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
 	    std::tm *local_time = std::localtime(&now_c);
@@ -20,4 +21,3 @@ std::string getClock() {
 	oss << std::put_time(std::localtime(&now_c), "%H:%M");
 	return " " + oss.str() + " ";
 }
-
