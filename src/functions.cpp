@@ -55,3 +55,7 @@ std::string trim(const std::string& str) {
     // Return the trimmed string
     return (start < end) ? std::string(start, end) : std::string();
 }
+
+std::string iconColor(const std::string icon) {
+	return "%{F#6896a5}" + icon + "%{F-}";
+} 

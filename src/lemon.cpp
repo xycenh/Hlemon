@@ -4,7 +4,6 @@
 #include "volume.h"
 #include "mic.h"
 #include "workspaces.h"
-#include "functions.h"
 #include "clock.h"
 #include <csignal>
 #include <cstdlib>

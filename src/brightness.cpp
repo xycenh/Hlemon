@@ -96,19 +96,17 @@ std::string Brightness::getBrightness() {
     actual_brightness = readIntFile(ACTUAL_BRIGHTNESS_FILE);
     max_brightness = readIntFile(MAX_BRIGHTNESS_FILE);
 		int brightness = ((actual_brightness + 10) * 100) / max_brightness;
-		std::string icon = "";
-		std::string color = "";
+		std::string icon = iconColor("BRI");
 
-		if (brightness < 20) {
-				icon = "";
-		} else if (brightness < 70) {
-				icon = "";
-		} else if (brightness < 100) {
-				icon = "";
-		} else if (brightness == 100) {
-				icon = "";
-		}
+		/*if (brightness < 20) {*/
+		/*		icon = "";*/
+		/*} else if (brightness < 70) {*/
+		/*		icon = "";*/
+		/*} else if (brightness < 100) {*/
+		/*		icon = "";*/
+		/*} else if (brightness == 100) {*/
+		/*		icon = "";*/
+		/*}*/
 
-		std::string format = " " + icon + " " + std::to_string(brightness) + "% ";
-    return format;
+    return " " + icon + " " + std::to_string(brightness) + "% ";
 }

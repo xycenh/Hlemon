@@ -11,7 +11,7 @@
 FILE *bar = nullptr;
 
 void initLemonbar() {
-    bar = popen("lemonbar -B \"#000000\" -g x25 -f \"Font Awesome 6 Pro Solid:size=11\" -f \"JetBrains Mono NL:size=11\" -d", "w");
+    bar = popen("lemonbar -B \"#000000\" -g 1920x25+0+0 -f \"JetBrains Mono NL:size=12\"", "w");
     if (!bar) {
         std::cerr << "Error initializing lemonbar\n";
         exit(1);
@@ -28,12 +28,12 @@ void updateLemonbar(const std::string& content) {
 std::string lemonOutput() {
 		return
 			"%{l} "
-            + Workspaces::getWorkspaces()
-            + "%{r}"
-            + Volume::getVolume() + "%{F#777777}|%{F-}"
+			+ Workspaces::getWorkspaces()
+			+ "%{r}"
+			+ Volume::getVolume() + "%{F#777777}|%{F-}"
 			+ Mic::getMicVolume() + "%{F#777777}|%{F-}"
-            + Brightness::getBrightness() + "%{F#777777}|%{F-}"
-            + Battery::getBattery() + "%{F#777777}|%{F-}"
-      	    + getClock()
-            + " ";
+			+ Brightness::getBrightness() + "%{F#777777}|%{F-}"
+			+ Battery::getBattery() + "%{F#777777}|%{F-}"
+			+ getClock()
+			+ " ";
 }

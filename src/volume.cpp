@@ -1,6 +1,8 @@
 #include "volume.h"
 #include <cerrno>
 #include <cstring>
+#include <string>
+#include "functions.h"
 #include "lemonOutput.h"
 
 // Initialize the static members
@@ -128,20 +130,27 @@ void Volume::monitor_volume_changes() {
 
 // Get current volume or mute state as a string
 std::string Volume::getVolume() {
-		std::string icon = "";
+		std::string icon = iconColor("VOL");
+		std::string state = "";
 
 		if (Volume::is_muted) {
-				icon = "";
-		} else if (Volume::current_percent< 15) {
-				icon = " ";
-		} else if (Volume::current_percent < 80) {
-				icon = " ";
-		} else if (Volume::current_percent < 100) {
-				icon = "";
-		} else if (Volume::current_percent == 100) {
-				icon = "";
+			state = " muted ";
+		} else {
+			state = " " + std::to_string(Volume::current_percent) + "% ";
 		}
-		std::string format = " " + icon + " " + std::to_string(Volume::current_percent) + "%" + " ";
-    /*return Volume::is_muted ? icon : icon + " " + std::to_string(Volume::current_percent) + "%";*/
-    return format;
+
+		/*if (Volume::is_muted) {*/
+		/*		icon = "";*/
+		/*} else if (Volume::current_percent< 15) {*/
+		/*		icon = " ";*/
+		/*} else if (Volume::current_percent < 80) {*/
+		/*		icon = " ";*/
+		/*} else if (Volume::current_percent < 100) {*/
+		/*		icon = "";*/
+		/*} else if (Volume::current_percent == 100) {*/
+		/*		icon = "";*/
+		/*}*/
+		
+    /*return icon + Volume::is_muted ? "mute" : " " + std::to_string(Volume::current_percent) + "%";*/
+    return " " + icon + state;
 }

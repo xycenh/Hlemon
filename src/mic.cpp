@@ -1,4 +1,5 @@
 #include "mic.h"
+#include "functions.h"
 #include "lemonOutput.h"
 #include <cerrno>
 #include <cstring>
@@ -135,14 +136,12 @@ void Mic::monitor_mic_changes() {
 
 // Get current microphone volume as a string
 std::string Mic::getMicVolume() {
-		std::string icon = "";
+		std::string icon = iconColor("MIC");
 		std::string format = "";
 
 		if (Mic::is_muted) {
-				icon = "";
-				format = " " + icon + " ";
+				format = " " + icon + " off ";
 		} else {
-				icon = "";
 				format = " " + icon + " " + std::to_string(Mic::current_percent) + "% ";
 		}
 		/*std::string format = " %{F" + color + "}" + icon + " " + std::to_string(Mic::current_percent) + "%" + " %{F-}";*/
