@@ -59,7 +59,7 @@ void Workspaces::checkWorkspaceStatus(const std::vector<std::string> &workspaces
         if (ws.empty())
             continue;
 
-				if (ws == "LM") {
+				if (ws == "LM" || ws == "LT") {
 					flag = false;
 					
 					if (i + 2 > workspaces.size() || i + 4 > workspaces.size()) {
@@ -98,7 +98,7 @@ void Workspaces::checkWorkspaceStatus(const std::vector<std::string> &workspaces
 std::string Workspaces::getWorkspaces() {
     std::string result = "";
     for (const std::string name : shownWorkspaces) {
-				if (name == "LM") {
+				if (name == "LM" || name == "LT") {
 					result += "%{F#777777}|%{F-} ";
 					continue;
 				}

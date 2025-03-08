@@ -18,6 +18,39 @@ void initLemonbar() {
     }
 }
 
+/*void initLemonbar() {*/
+/*    FILE* xrandr = popen("xrandr --query | grep '^eDP-1'", "r");*/
+/*    if (!xrandr) {*/
+/*        std::cerr << "Error running xrandr\n";*/
+/*        exit(1);*/
+/*    }*/
+/**/
+/*    char buffer[128];*/
+/*    std::string output;*/
+/*    while (fgets(buffer, sizeof(buffer), xrandr) != nullptr) {*/
+/*        output += buffer;*/
+/*    }*/
+/*    pclose(xrandr);*/
+/**/
+/*    int width = 1600, height = 25, x = 0, y = 0;*/
+/*    std::istringstream ss(output);*/
+/*    std::string token;*/
+/*    if (ss >> token >> token >> token) { // Extract resolution and position*/
+/*        sscanf(token.c_str(), "%dx%d+%d+%d", &width, &height, &x, &y);*/
+/*    }*/
+/**/
+/*    std::string cmd = "lemonbar -B \"#000000\" -g " + */
+/*                      std::to_string(width) + "x" + std::to_string(height) +*/
+/*                      "+" + std::to_string(x) + "+" + std::to_string(y) +*/
+/*                      " -f \"JetBrains Mono NL:size=12\"";*/
+/**/
+/*    bar = popen(cmd.c_str(), "w");*/
+/*    if (!bar) {*/
+/*        std::cerr << "Error initializing lemonbar\n";*/
+/*        exit(1);*/
+/*    }*/
+/*}*/
+
 void updateLemonbar(const std::string& content) {
     if (bar) {
         fprintf(bar, "%s\n", content.c_str());
