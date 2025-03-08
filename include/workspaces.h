@@ -12,7 +12,7 @@ private:
   static std::vector<std::string> shownWorkspaces;
   std::string workspaceEvent = "";
   void exec();
-  std::vector<std::string> parseString(std::string &);
+  std::vector<std::string> parseString(std::string);
   void checkWorkspaceStatus(const std::vector<std::string> &);
 
 public:

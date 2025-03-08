@@ -11,7 +11,7 @@
 FILE *bar = nullptr;
 
 void initLemonbar() {
-    bar = popen("lemonbar -B \"#000000\" -g 1920x25+0+0 -f \"JetBrains Mono NL:size=12\"", "w");
+    bar = popen("lemonbar -B \"#000000\" -g 1600x25+0+0 -f \"JetBrains Mono NL:size=12\"", "w");
     if (!bar) {
         std::cerr << "Error initializing lemonbar\n";
         exit(1);
