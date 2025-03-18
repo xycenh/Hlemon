@@ -59,14 +59,28 @@ void updateLemonbar(const std::string& content) {
 }
 
 std::string lemonOutput() {
-		return
-			"%{l} "
-			+ Workspaces::getWorkspaces()
-			+ "%{r}"
-			+ Volume::getVolume() + "%{F#777777}|%{F-}"
-			+ Mic::getMicVolume() + "%{F#777777}|%{F-}"
-			+ Brightness::getBrightness() + "%{F#777777}|%{F-}"
-			+ Battery::getBattery() + "%{F#777777}|%{F-}"
-			+ getClock()
-			+ " ";
+    std::string separator = "%{F#777777}|%{F-}";
+    /*std::cout <<*/
+    /*    "%{l} "*/
+    /*    << Workspaces::getWorkspaces() << separator << " "*/
+    /*    << Workspaces::getWindows()*/
+    /*    << "%{r}"*/
+    /*    << Volume::getVolume() << separator*/
+    /*    << Mic::getMicVolume() << separator*/
+    /*    << Brightness::getBrightness() << separator*/
+    /*    << Battery::getBattery() << separator*/
+    /*    << getClock()*/
+    /*    << " " << std::endl;*/
+
+    return
+        "%{l} "
+        + Workspaces::getWorkspaces()
+        + Workspaces::getWindows()
+        + "%{r}"
+        + Volume::getVolume() + separator
+        + Mic::getMicVolume() + separator
+        + Brightness::getBrightness() + separator
+        + Battery::getBattery() + separator
+        + getClock()
+        + " ";
 }

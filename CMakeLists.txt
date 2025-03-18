@@ -17,7 +17,7 @@ add_executable(lemon
     src/workspaces.cpp
     src/clock.cpp
     src/volume.cpp
-		src/mic.cpp
+    src/mic.cpp
 )
 
 include_directories(${ALSA_INCLUDE_DIRS})
