@@ -1,6 +1,7 @@
 #include "workspaces.h"
 #include "lemonOutput.h"
 #include "functions.h"
+#include <ostream>
 #include <string>
 #include <vector>
 #include <cstdio>
@@ -102,37 +103,45 @@ void Workspaces::checkWorkspaceStatus(const std::vector<std::string> &workspaces
 
 void Workspaces::checkWindows(const char &status,const std::string &workspace) {
     if (status == 'F') return;
-
     std::string focusedColor = "#393939";
     std::string color = "#000000";
 
-    std::string windows_command = R"(bspc query -N -d ")" + workspace + R"(" | xargs -I{} xprop -id {} WM_CLASS 2>/dev/null | awk -F '"' 'NF>1 {print $(NF-1)}')";
-    std::string windows = trim(::exec(windows_command.c_str()));
-    
-    std::string focused_window_command = "bspc query -N -n focused | xprop -id $(cat) WM_CLASS | awk -F '\"' 'NF>1 {print $(NF-1)}'";
-    std::string focused_window = trim(::exec(focused_window_command.c_str()));
-
-
-    size_t pos = 0, found;
-    while ((found = windows.find('\n', pos)) != std::string::npos) {
-        std::string window_name = windows.substr(pos, found - pos);
-        if (focused_window == window_name) {
-            color = focusedColor;
-        } else {
-            color = "#000000";
-        }
-        windowsInWorkspace.push_back("%{B" + color + "}%{O10}" + truncateString(window_name) + "%{O10}%{B-}");
-        pos = found + 1;  
+    std::string windows_id_command = "bspc query -N -d " + workspace;
+    std::string windows_id = trim(::exec(windows_id_command.c_str()));
+    std::vector<std::string> window_ids;
+    size_t pos_1 = 0;
+    size_t found_1;
+    while ((found_1 = windows_id.find('\n', pos_1)) != std::string::npos) {
+        window_ids.push_back(windows_id.substr(pos_1, found_1 - pos_1));  
+        pos_1 = found_1 + 1;  
     }
+    window_ids.push_back(windows_id.substr(pos_1));
 
-    if (pos < windows.length()) {
-        std::string window_name = windows.substr(pos);
-        if (focused_window == window_name) {
-            color = focusedColor;
+    std::vector<std::string> window_classes;
+    
+    for (auto it = window_ids.begin(); it != window_ids.end();) {
+        std::string command = "xprop -id " + *it + " WM_CLASS 2>/dev/null | awk -F '\"' 'NF>1 {print $(NF-1)}'";
+        std::string window_class = trim(::exec(command.c_str()));
+
+        if (!window_class.empty()) {
+            window_classes.push_back(window_class);
+            ++it;
         } else {
-            color = "#000000";
+            it = window_ids.erase(it);
         }
-        windowsInWorkspace.push_back("%{B" + color + "}%{O10}" + truncateString(window_name) + "%{O10}%{B-}");
+    }
+    
+    if (window_ids.size() != window_classes.size()) 
+        std::cout << "error happened!" << std::endl;
+
+    std::string focused_window_id_command = "bspc query -N -n focused";
+    std::string focused_window_id = trim(::exec(focused_window_id_command.c_str()));
+
+    for (size_t i = 0; i < window_ids.size(); i++) {
+        if (focused_window_id == window_ids[i]) color = focusedColor;
+        else color = "#000000";
+
+        windowsInWorkspace.push_back("%{B" + color + "}%{O10}" + truncateString(window_classes[i]) + "%{O10}%{B-}");
     }
 }
 
