@@ -11,7 +11,7 @@
 FILE *bar = nullptr;
 
 void initLemonbar() {
-    bar = popen("lemonbar -B \"#000000\" -g 1600x25+0+0 -f \"JetBrains Mono NL:size=12\"", "w");
+    bar = popen("lemonbar -B \"#1e1e2e\" -g 1600x25+0+0 -f \"Iosevka Fixed:size=12\" -d", "w");
     if (!bar) {
         std::cerr << "Error initializing lemonbar\n";
         exit(1);
@@ -59,19 +59,20 @@ void updateLemonbar(const std::string& content) {
 }
 
 std::string lemonOutput() {
-    std::string separator = "%{F#777777}|%{F-}";
-    /*std::cout <<*/
-    /*    "%{l} "*/
-    /*    << Workspaces::getWorkspaces() << separator << " "*/
-    /*    << Workspaces::getWindows()*/
-    /*    << "%{r}"*/
-    /*    << Volume::getVolume() << separator*/
-    /*    << Mic::getMicVolume() << separator*/
-    /*    << Brightness::getBrightness() << separator*/
-    /*    << Battery::getBattery() << separator*/
-    /*    << getClock()*/
-    /*    << " " << std::endl;*/
-
+    std::string separator = "%{F#7f849c}|%{F-}";
+    // std::cout << 
+    // "%{l} "
+    // << Workspaces::getWorkspaces() << separator << " "
+    // << Workspaces::getWindows()
+    // << "%{r}"
+    // << Volume::getVolume() << separator
+    // << Mic::getMicVolume() << separator
+    // << Brightness::getBrightness() << separator
+    // << Battery::getBattery() << separator
+    // << getClock()
+    // << " " << std::endl;
+    //
+    // return "";
     return
         "%{l} "
         + Workspaces::getWorkspaces()

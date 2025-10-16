@@ -58,7 +58,7 @@ int readIntFile(const char *path) {
 }
 
 std::string iconColor(const std::string icon) {
-	return "%{F#6896a5}" + icon + "%{F-}";
+	return "%{F#89b4fa}" + icon + "%{F-}";
 } 
 
 

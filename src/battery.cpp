@@ -37,35 +37,6 @@ void Battery::monitor() {
 std::string Battery::getBattery() {
     std::string icon = "";
 		std::string color = "#ffffff";
-		/*  if (status == "Not") {*/
-		/*		icon = "";*/
-		/*		color = "#88ff88";*/
-		/*} else if (status == "Discharging") {*/
-		/*		if (capacity < 5) {*/
-		/*				icon = "";*/
-		/*				color = "#ff4444";*/
-		/*		} else if (capacity < 20) {*/
-		/*				icon = "";*/
-		/*				color = "#ff8888";*/
-		/*		} else if (capacity < 40) {*/
-		/*				icon = "";*/
-		/*		} else if (capacity < 60) {*/
-		/*				icon = "";*/
-		/*		} else if (capacity < 90) {*/
-		/*				icon = "";*/
-		/*		} else if (capacity < 100) {*/
-		/*				icon = "";*/
-		/*				color = "#88ff88";*/
-		/*		}*/
-		/*} else if (status == "Charging") {*/
-		/*		icon = "";*/
-		/*		color = "#88ff88";*/
-		/*} else if (status == "Full") {*/
-		/*		icon = "";*/
-		/*		color = "#44ff44";*/
-		/*} else {*/
-		/*		icon = "";*/
-		/*}*/
 
 		if (status == "Not") {
 			icon = iconColor("ADP");

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
-project(lemon)
+project(lemon CXX)
 
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include_directories(include)
@@ -20,12 +21,19 @@ add_executable(lemon
     src/mic.cpp
 )
 
-include_directories(${ALSA_INCLUDE_DIRS})
+include_directories(
+    ${ALSA_INCLUDE_DIRS}
+    /usr/include   # for xcb headers
+)
 
 target_link_libraries(lemon
     udev
     ${ALSA_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
+    xcb
+    xcb-ewmh
+    xcb-icccm
+    xcb-randr
 )
 
 install(TARGETS lemon DESTINATION /usr/bin)
