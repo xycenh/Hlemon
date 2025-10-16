@@ -362,9 +362,10 @@ std::string Workspaces::getWindows() {
 }
 
 std::string Workspaces::getWorkspaces() {
-    std::string result = "";
+    std::string result = " ";
     for (const std::string& ws : shownWorkspaces) {
         result += ws;
     }
+    result += " %{F#7f849c}|%{F-} ";
     return result;
 }
