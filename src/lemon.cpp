@@ -5,6 +5,7 @@
 #include "mic.h"
 #include "workspaces.h"
 #include "clock.h"
+#include "layout.h"
 #include <csignal>
 #include <cstdlib>
 #include <iostream>
@@ -41,16 +42,20 @@ int main() {
     });
 
     threads.emplace_back([&](){
-					displayTime();
+        displayTime();
     });
 
     threads.emplace_back([&](){
-				Volume volume;
+        Volume volume;
     });
 
-		threads.emplace_back([&](){
-				Mic mic;
-		});
+    threads.emplace_back([&](){
+        Mic mic;
+    });
+
+    threads.emplace_back([&](){
+        Keyboard layout;
+    });
 
 
     // Wait for threads to complete

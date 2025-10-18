@@ -15,6 +15,9 @@
 struct Monitor {
     int x, y, width, height;
     std::string name;
+    std::string activeWorkspace;
+    std::vector<std::string> visibleWindows;
+    std::string activeWindow;
 };
 
 class Xsession {

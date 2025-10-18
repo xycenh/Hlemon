@@ -5,6 +5,7 @@
 #include "mic.h"
 #include "workspaces.h"
 #include "clock.h"
+#include "layout.h"
 #include <iostream>
 #include <string>
 
@@ -78,6 +79,7 @@ std::string lemonOutput() {
         + Workspaces::getWorkspaces()
         + Workspaces::getWindows()
         + "%{r}"
+        + Keyboard::get_layout() + " " + separator
         + Volume::getVolume() + separator
         + Mic::getMicVolume() + separator
         + Brightness::getBrightness() + separator
