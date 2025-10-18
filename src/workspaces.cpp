@@ -17,8 +17,8 @@ std::vector<std::string> Workspaces::shownWorkspaces = {};
 std::vector<std::string> Workspaces::windowsInWorkspace = {};
 
 Workspaces::Workspaces() {
-    exec();
     Xsession xsession;
+    exec();
 }
 
 Xsession::Xsession() {
@@ -27,18 +27,18 @@ Xsession::Xsession() {
     xcb_screen_t* screen = get_screen(conn);
     subscribe_event_for_root_window(conn, screen);
     std::vector<Monitor> monitors = get_monitors(conn, screen);
-    refresh(conn, &ewmh, monitors, screen->root);
     event_loop(conn, &ewmh, monitors, screen);
     xcb_ewmh_connection_wipe(&ewmh);
     xcb_disconnect(conn);
 }
 
-
 // Get window class
 std::string get_window_class(xcb_connection_t* conn, xcb_window_t win) {
     xcb_icccm_get_wm_class_reply_t class_reply;
     if (xcb_icccm_get_wm_class_reply(conn, xcb_icccm_get_wm_class(conn, win), &class_reply, nullptr)) {
-        return class_reply.class_name ? std::string(class_reply.class_name) : "Unknown";
+        std::string result = class_reply.class_name ? std::string(class_reply.class_name) : "Unknown";
+        xcb_icccm_get_wm_class_reply_wipe(&class_reply);
+        return result;
     }
     return "Unknown";
 }
@@ -70,77 +70,136 @@ xcb_window_t get_active_window(xcb_ewmh_connection_t* ewmh, int screen_idx) {
     return win;
 }
 
-// Print workspaces with * and # marks
-void print_workspaces(xcb_ewmh_connection_t* ewmh, uint32_t focused_desktop,
-                      const std::vector<uint32_t>& active_others) {
-    xcb_ewmh_get_utf8_strings_reply_t names_reply;
-    if (!xcb_ewmh_get_desktop_names_reply(ewmh, xcb_ewmh_get_desktop_names(ewmh, 0), &names_reply, nullptr))
-        return;
-
-    // Parse names into vector, handling possible missing trailing null
-    std::vector<std::string> names_vec;
-    size_t offset = 0;
-    for (unsigned i = 0; i < names_reply.strings_len; ++i) {
-        if (names_reply.strings[i] == '\0') {
-            names_vec.push_back(std::string(&names_reply.strings[offset], i - offset));
-            offset = i + 1;
-        }
-    }
-    if (offset < names_reply.strings_len) {
-        names_vec.push_back(std::string(&names_reply.strings[offset], names_reply.strings_len - offset));
-    }
-    xcb_ewmh_get_utf8_strings_reply_wipe(&names_reply);
-
-    // Get number of desktops
-    uint32_t num_desktops = 0;
-    xcb_ewmh_get_number_of_desktops_reply(ewmh, xcb_ewmh_get_number_of_desktops(ewmh, 0), &num_desktops, nullptr);
-
-    std::cout << "Workspaces:\n";
-    for (unsigned idx = 0; idx < num_desktops; ++idx) {
-        std::string ws_name = (idx < names_vec.size()) ? names_vec[idx] : "Desktop " + std::to_string(idx);
-
-        std::string mark = " ";
-        if (idx == focused_desktop) mark = "*";
-        else if (std::find(active_others.begin(), active_others.end(), idx) != active_others.end()) mark = "#";
-
-        std::cout << mark << " " << ws_name << "\n";
-    }
-}
-
-// Print windows with * and # marks
-void print_windows(xcb_ewmh_connection_t* ewmh, xcb_window_t focused_win,
-                   const std::vector<xcb_window_t>& active_others) {
+// Get desktops that have windows
+std::vector<uint32_t> get_desktops_with_windows(xcb_ewmh_connection_t* ewmh) {
+    std::vector<uint32_t> desktops_with_windows;
     xcb_ewmh_get_windows_reply_t clients;
+    
     if (!xcb_ewmh_get_client_list_reply(ewmh, xcb_ewmh_get_client_list(ewmh, 0), &clients, nullptr))
-        return;
+        return desktops_with_windows;
 
-    std::cout << "\nWindows:\n";
     for (unsigned i = 0; i < clients.windows_len; ++i) {
         xcb_window_t win = clients.windows[i];
         uint32_t desktop = 0;
         xcb_ewmh_get_wm_desktop_reply(ewmh, xcb_ewmh_get_wm_desktop(ewmh, win), &desktop, nullptr);
-        std::string cls = get_window_class(ewmh->connection, win);
-
-        std::string mark = " ";
-        if (win == focused_win) mark = "*";
-        else if (std::find(active_others.begin(), active_others.end(), win) != active_others.end()) mark = "#";
-
-        std::cout << mark << " " << cls << " -> Workspace " << desktop << "\n";
+        
+        if (std::find(desktops_with_windows.begin(), desktops_with_windows.end(), desktop) == desktops_with_windows.end()) {
+            desktops_with_windows.push_back(desktop);
+        }
     }
 
     xcb_ewmh_get_windows_reply_wipe(&clients);
+    std::sort(desktops_with_windows.begin(), desktops_with_windows.end());
+    return desktops_with_windows;
 }
 
-// Refresh display
-void Xsession::refresh(xcb_connection_t* conn, xcb_ewmh_connection_t* ewmh, const std::vector<Monitor>& monitors, xcb_window_t root) {
-    std::cout << "\033[2J\033[H"; // clear screen
+// Build workspaces output for lemonbar
+std::string build_workspaces_output(xcb_ewmh_connection_t* ewmh, uint32_t focused_desktop) {
+    xcb_ewmh_get_utf8_strings_reply_t names_reply;
+    if (!xcb_ewmh_get_desktop_names_reply(ewmh, xcb_ewmh_get_desktop_names(ewmh, 0), &names_reply, nullptr))
+        return "";
 
+    std::vector<std::string> names_vec;
+    size_t offset = 0;
+    for (unsigned i = 0; i < names_reply.strings_len; ++i) {
+        if (names_reply.strings[i] == '\0') {
+            std::string name(&names_reply.strings[offset], i - offset);
+            // Remove newline characters
+            name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
+            names_vec.push_back(name);
+            offset = i + 1;
+        }
+    }
+    if (offset < names_reply.strings_len) {
+        std::string name(&names_reply.strings[offset], names_reply.strings_len - offset);
+        // Remove newline characters
+        name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
+        names_vec.push_back(name);
+    }
+    xcb_ewmh_get_utf8_strings_reply_wipe(&names_reply);
+
+    // Get only desktops that have windows
+    std::vector<uint32_t> desktops_with_windows = get_desktops_with_windows(ewmh);
+    
+    // Always include the focused desktop
+    if (std::find(desktops_with_windows.begin(), desktops_with_windows.end(), focused_desktop) == desktops_with_windows.end()) {
+        desktops_with_windows.push_back(focused_desktop);
+    }
+    
+    // Sort to maintain order
+    std::sort(desktops_with_windows.begin(), desktops_with_windows.end());
+
+    std::string result = "";
+    std::string focusedColor = "#45475a";
+
+    for (uint32_t idx : desktops_with_windows) {
+        std::string ws_name = (idx < names_vec.size()) ? names_vec[idx] : "Desktop " + std::to_string(idx);
+        
+        std::string formatted;
+        if (idx == focused_desktop) {
+            // Only focused workspace gets background color
+            formatted = "%{A:bspc desktop -f '" + ws_name + "':}%{B" + focusedColor + "}%{O10}" + ws_name + "%{O10}%{B-}%{A}";
+        } else {
+            // Other workspaces have no background
+            formatted = "%{A:bspc desktop -f '" + ws_name + "':}%{O10}" + ws_name + "%{O10}%{A}";
+        }
+        result += formatted;
+    }
+
+    return result;
+}
+
+// Build windows output for lemonbar
+std::string build_windows_output(xcb_ewmh_connection_t* ewmh, xcb_window_t focused_win, uint32_t current_desktop) {
+    xcb_ewmh_get_windows_reply_t clients;
+    if (!xcb_ewmh_get_client_list_reply(ewmh, xcb_ewmh_get_client_list(ewmh, 0), &clients, nullptr))
+        return "";
+
+    std::string focusedColor = "#45475a";
+    std::string result = "";
+
+    for (unsigned i = 0; i < clients.windows_len; ++i) {
+        xcb_window_t win = clients.windows[i];
+        uint32_t desktop = 0;
+        xcb_ewmh_get_wm_desktop_reply(ewmh, xcb_ewmh_get_wm_desktop(ewmh, win), &desktop, nullptr);
+
+        // Only show windows in current desktop
+        if (desktop != current_desktop)
+            continue;
+
+        std::string cls = get_window_class(ewmh->connection, win);
+        
+        // Remove newline characters
+        cls.erase(std::remove(cls.begin(), cls.end(), '\n'), cls.end());
+        
+        // Normalize class names
+        if (cls == "com.mitchellh.ghostty")
+            cls = "ghostty";
+        else if (cls == "TelegramDesktop")
+            cls = "telegram";
+
+        std::string formatted;
+        if (win == focused_win) {
+            formatted = "%{B" + focusedColor + "}%{O10}" + truncateString(cls) + "%{O10}%{B-}";
+        } else {
+            formatted = "%{O10}" + truncateString(cls) + "%{O10}%{B-}";
+        }
+        result += formatted;
+    }
+
+    xcb_ewmh_get_windows_reply_wipe(&clients);
+    return result;
+}
+
+// Update lemonbar with current state
+void Xsession::update_display(xcb_connection_t* conn, xcb_ewmh_connection_t* ewmh, 
+                               const std::vector<Monitor>& monitors, xcb_window_t root) {
     int screen_idx = 0;
-
     xcb_window_t active_win = get_active_window(ewmh, screen_idx);
+    uint32_t focused_desktop = get_current_desktop(ewmh, screen_idx);
 
+    // Get focused monitor
     int focused_monitor = 1;
-
     if (active_win != XCB_WINDOW_NONE) {
         xcb_translate_coordinates_reply_t* trans = xcb_translate_coordinates_reply(
             conn, xcb_translate_coordinates(conn, active_win, root, 0, 0), nullptr);
@@ -167,7 +226,6 @@ void Xsession::refresh(xcb_connection_t* conn, xcb_ewmh_connection_t* ewmh, cons
             }
         }
     } else {
-        // Fallback to mouse position
         xcb_query_pointer_reply_t* ptr = xcb_query_pointer_reply(conn, xcb_query_pointer(conn, root), nullptr);
         if (ptr) {
             int mouse_x = ptr->root_x;
@@ -186,18 +244,21 @@ void Xsession::refresh(xcb_connection_t* conn, xcb_ewmh_connection_t* ewmh, cons
         }
     }
 
-    uint32_t focused_desktop = get_current_desktop(ewmh, screen_idx);
-    xcb_window_t focused_window = active_win;
+    // Build output
+    std::string workspaces_output = build_workspaces_output(ewmh, focused_desktop);
+    std::string windows_output = build_windows_output(ewmh, active_win, focused_desktop);
 
-    // Since assuming single screen, no other active desktops/windows
-    std::vector<uint32_t> other_active_desktops;
-    std::vector<xcb_window_t> other_active_windows;
+    // Format final output: workspaces | windows
+    std::string output = workspaces_output;
+    if (!windows_output.empty()) {
+        output += " %{F#7f849c}|%{F-} " + windows_output;
+    }
 
-    print_workspaces(ewmh, focused_desktop, other_active_desktops);
-    std::cout << "\nFocused Monitor: " << focused_monitor << "\n";
-    print_windows(ewmh, focused_window, other_active_windows);
+    // Store in static members for getter access
+    Workspaces::shownWorkspaces = {workspaces_output};
+    Workspaces::windowsInWorkspace = {windows_output};
 
-    std::cout << std::flush;
+    updateLemonbar(lemonOutput());
 }
 
 xcb_connection_t* Xsession::get_x11_conn() {
@@ -215,7 +276,6 @@ xcb_ewmh_connection_t Xsession::get_ewmh_conn(xcb_connection_t* conn) {
 }
 
 void Xsession::event_loop(xcb_connection_t* conn, xcb_ewmh_connection_t* ewmh, std::vector<Monitor> monitors, xcb_screen_t* screen) {
-    // Event loop
     xcb_generic_event_t* event;
     while ((event = xcb_wait_for_event(conn))) {
         uint8_t type = event->response_type & ~0x80;
@@ -233,7 +293,9 @@ void Xsession::event_loop(xcb_connection_t* conn, xcb_ewmh_connection_t* ewmh, s
             update = true;
         }
 
-        if (update) refresh(conn, ewmh, monitors, screen->root);
+        if (update) {
+            update_display(conn, ewmh, monitors, screen->root);
+        }
         free(event);
     }
 }
@@ -249,8 +311,6 @@ void Xsession::subscribe_event_for_root_window(xcb_connection_t* conn, xcb_scree
 }
 
 std::vector<Monitor> Xsession::get_monitors(xcb_connection_t* conn, xcb_screen_t* screen) {
-
-    // Get monitors using RandR
     std::vector<Monitor> monitors;
     xcb_randr_get_screen_resources_reply_t* res_reply = xcb_randr_get_screen_resources_reply(
         conn, xcb_randr_get_screen_resources(conn, screen->root), nullptr);
@@ -281,7 +341,6 @@ std::vector<Monitor> Xsession::get_monitors(xcb_connection_t* conn, xcb_screen_t
     }
 
     if (monitors.empty()) {
-        // Fallback to single monitor
         Monitor mon;
         mon.x = 0;
         mon.y = 0;
@@ -293,6 +352,11 @@ std::vector<Monitor> Xsession::get_monitors(xcb_connection_t* conn, xcb_screen_t
 
     return monitors;
 }
+
+
+
+
+
 
 void Workspaces::exec() {
   FILE *pipe = popen("bspc subscribe", "r");
@@ -433,8 +497,8 @@ void Workspaces::checkWindows(const char &status,const std::string &workspace) {
 
 std::string Workspaces::getWindows() {
     std::string result = "";
-    for (const std::string name : windowsInWorkspace) {
-        result += name ;
+    for (const std::string& ws : windowsInWorkspace) {
+        result += ws ;
     }
     if (result != "") return " %{F#7f849c}|%{F-} " + result;
     return result;
@@ -451,3 +515,14 @@ std::string Workspaces::getWorkspaces() {
     }
     return result;
 }
+
+
+
+// std::string Workspaces::getWorkspaces() {
+//     std::string result = " ";
+//     for (const std::string& ws : shownWorkspaces) {
+//         result += ws;
+//     }
+//     result += " %{F#7f849c}|%{F-} ";
+//     return result;
+// }
