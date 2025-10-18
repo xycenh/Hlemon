@@ -98,15 +98,12 @@ std::string Brightness::getBrightness() {
 		int brightness = ((actual_brightness + 10) * 100) / max_brightness;
 		std::string icon = iconColor("BRI");
 
-		/*if (brightness < 20) {*/
-		/*		icon = "";*/
-		/*} else if (brightness < 70) {*/
-		/*		icon = "";*/
-		/*} else if (brightness < 100) {*/
-		/*		icon = "";*/
-		/*} else if (brightness == 100) {*/
-		/*		icon = "";*/
-		/*}*/
-
-    return " " + icon + " " + std::to_string(brightness) + "% ";
+    return 
+        "%{A4:brightnessctl set +1%:}"
+        "%{A5:brightnessctl set 1%-:}"
+        " "
+        + icon
+        + " "
+        + std::to_string(brightness) + "% "
+        "%{A}%{A}";
 }

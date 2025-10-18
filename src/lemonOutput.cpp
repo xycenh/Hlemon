@@ -12,7 +12,7 @@
 FILE *bar = nullptr;
 
 void initLemonbar() {
-    bar = popen("lemonbar -B \"#1e1e2e\" -g 1600x25+0+0 -f \"Iosevka Fixed:size=12\" -d", "w");
+    bar = popen("lemonbar -B \"#1e1e2e\" -g 1600x25+0+0 -f \"Iosevka Fixed:size=12\" -d -a 100", "w");
     if (!bar) {
         std::cerr << "Error initializing lemonbar\n";
         exit(1);
@@ -63,23 +63,24 @@ std::string lemonOutput() {
     std::string separator = "%{F#7f849c}|%{F-}";
     // std::cout << 
     // "%{l} "
-    // << Workspaces::getWorkspaces() << separator << " "
+    // << Workspaces::getWorkspaces()
     // << Workspaces::getWindows()
     // << "%{r}"
+    // << Keyboard::get_layout() << separator
     // << Volume::getVolume() << separator
     // << Mic::getMicVolume() << separator
     // << Brightness::getBrightness() << separator
     // << Battery::getBattery() << separator
     // << getClock()
     // << " " << std::endl;
-    //
+
     // return "";
     return
         "%{l} "
         + Workspaces::getWorkspaces()
         + Workspaces::getWindows()
         + "%{r}"
-        + Keyboard::get_layout() + " " + separator
+        + Keyboard::get_layout() + separator
         + Volume::getVolume() + separator
         + Mic::getMicVolume() + separator
         + Brightness::getBrightness() + separator

@@ -67,7 +67,7 @@ Keyboard::~Keyboard() {
 
 std::string Keyboard::get_layout() {
     std::lock_guard<std::mutex> lock(layoutMutex);
-    return currentLayout;
+    return "%{A:xkb-switch -n:} " + currentLayout + " %{A}";
 }
 
 std::string Keyboard::layout_from_group(unsigned group) const {

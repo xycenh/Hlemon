@@ -17,8 +17,8 @@ std::vector<std::string> Workspaces::shownWorkspaces = {};
 std::vector<std::string> Workspaces::windowsInWorkspace = {};
 
 Workspaces::Workspaces() {
+    // exec();
     Xsession xsession;
-    exec();
 }
 
 Xsession::Xsession() {
@@ -149,7 +149,6 @@ std::string build_workspaces_output(xcb_ewmh_connection_t* ewmh, uint32_t focuse
     return result;
 }
 
-// Build windows output for lemonbar
 std::string build_windows_output(xcb_ewmh_connection_t* ewmh, xcb_window_t focused_win, uint32_t current_desktop) {
     xcb_ewmh_get_windows_reply_t clients;
     if (!xcb_ewmh_get_client_list_reply(ewmh, xcb_ewmh_get_client_list(ewmh, 0), &clients, nullptr))
@@ -168,22 +167,26 @@ std::string build_windows_output(xcb_ewmh_connection_t* ewmh, xcb_window_t focus
             continue;
 
         std::string cls = get_window_class(ewmh->connection, win);
-        
-        // Remove newline characters
         cls.erase(std::remove(cls.begin(), cls.end(), '\n'), cls.end());
-        
+
         // Normalize class names
         if (cls == "com.mitchellh.ghostty")
             cls = "ghostty";
         else if (cls == "TelegramDesktop")
             cls = "telegram";
 
+        std::string win_id_str = std::to_string(win);
+
+        // Clickable areas: left-click to focus, right-click to close
+        std::string click_tag = "%{A:bspc node -f " + win_id_str + ":}%{A3:bspc node " + win_id_str + " -c:}";
+
         std::string formatted;
         if (win == focused_win) {
-            formatted = "%{B" + focusedColor + "}%{O10}" + truncateString(cls) + "%{O10}%{B-}";
+            formatted = click_tag + "%{B" + focusedColor + "}%{O10}" + truncateString(cls) + "%{O10}%{B-}%{A}%{A}";
         } else {
-            formatted = "%{O10}" + truncateString(cls) + "%{O10}%{B-}";
+            formatted = click_tag + "%{O10}" + truncateString(cls) + "%{O10}%{B-}%{A}%{A}";
         }
+
         result += formatted;
     }
 
@@ -461,6 +464,10 @@ void Workspaces::checkWindows(const char &status,const std::string &workspace) {
     }
     window_ids.push_back(windows_id.substr(pos_1));
 
+
+    for (const auto& id : window_ids)
+        std::cout << id << std::endl;
+
     std::vector<std::string> window_classes;
     
     for (auto it = window_ids.begin(); it != window_ids.end();) {
@@ -489,8 +496,8 @@ void Workspaces::checkWindows(const char &status,const std::string &workspace) {
 
     for (size_t i = 0; i < window_ids.size(); i++) {
         if (focused_window_id == window_ids[i])
-            windowsInWorkspace.push_back("%{B" + focusedColor + "}%{O10}" + truncateString(window_classes[i]) + "%{O10}%{B-}");
-        else windowsInWorkspace.push_back("%{O10}" + truncateString(window_classes[i]) + "%{O10}%{B-}");
+            windowsInWorkspace.push_back("%{B" + focusedColor + "}%{A3:bspc node " + window_ids[i] + " -c:}%{O10}" + truncateString(window_classes[i]) + "%{O10}%{B-}");
+        else windowsInWorkspace.push_back("%{A:bspc node -f " + window_ids[i] + ":}%{A3:bspc node " + window_ids[i] + " -c:}%{O10}" + truncateString(window_classes[i]) + "%{O10}%{B-}%{A}");
 
     }
 }

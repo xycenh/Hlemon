@@ -128,29 +128,22 @@ void Volume::monitor_volume_changes() {
     snd_mixer_close(mixer);
 }
 
-// Get current volume or mute state as a string
 std::string Volume::getVolume() {
 		std::string icon = iconColor("VOL");
 		std::string state = "";
 
 		if (Volume::is_muted) {
-			state = " muted ";
+			state = " muted";
 		} else {
-			state = " " + std::to_string(Volume::current_percent) + "% ";
+			state = " " + std::to_string(Volume::current_percent) + "%";
 		}
-
-		/*if (Volume::is_muted) {*/
-		/*		icon = "";*/
-		/*} else if (Volume::current_percent< 15) {*/
-		/*		icon = " ";*/
-		/*} else if (Volume::current_percent < 80) {*/
-		/*		icon = " ";*/
-		/*} else if (Volume::current_percent < 100) {*/
-		/*		icon = "";*/
-		/*} else if (Volume::current_percent == 100) {*/
-		/*		icon = "";*/
-		/*}*/
 		
-    /*return icon + Volume::is_muted ? "mute" : " " + std::to_string(Volume::current_percent) + "%";*/
-    return " " + icon + state;
+    return "%{A1:alacritty -e wiremix -v playback &:}"
+        "%{A3:wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle:}"
+        "%{A4:wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 1%+:}"
+        "%{A5:wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-:}"
+        " "
+        + icon
+        + state
+        + " %{A}%{A}%{A}%{A}";
 }

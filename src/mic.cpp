@@ -140,10 +140,16 @@ std::string Mic::getMicVolume() {
 		std::string format = "";
 
 		if (Mic::is_muted) {
-				format = " " + icon + " off ";
+				format = icon + " off";
 		} else {
-				format = " " + icon + " " + std::to_string(Mic::current_percent) + "% ";
+				format = icon + " " + std::to_string(Mic::current_percent) + "%";
 		}
 		/*std::string format = " %{F" + color + "}" + icon + " " + std::to_string(Mic::current_percent) + "%" + " %{F-}";*/
-    return format;
+    return "%{A1:alacritty -e wiremix -v input &:}"
+        "%{A3:wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle:}"
+        "%{A4:wpctl set-volume -l 1 @DEFAULT_AUDIO_SOURCE@ 1%+:}"
+        "%{A5:wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 1%-:}"
+        " "
+        + format
+        + " %{A}%{A}%{A}%{A}";
 }

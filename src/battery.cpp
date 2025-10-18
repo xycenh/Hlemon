@@ -49,5 +49,5 @@ std::string Battery::getBattery() {
 		}
 		
 		/*std::string format = " %{F" + color + "}" + icon + " " + std::to_string(capacity) + "% %{F-}";*/
-    return " " + icon + " " + std::to_string(capacity) + "% ";
+    return "%{A:alacritty -e htop &:} " + icon + " " + std::to_string(capacity) + "% %{A}";
 }

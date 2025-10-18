@@ -19,5 +19,5 @@ std::string getClock() {
 
 	std::ostringstream oss;
 	oss << std::put_time(std::localtime(&now_c), "%H:%M");
-	return " " + oss.str() + " ";
+	return "%{A:alacritty -e calcurse &:} " + oss.str() + " %{A}";
 }
