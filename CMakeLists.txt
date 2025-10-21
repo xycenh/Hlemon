@@ -24,6 +24,7 @@ add_executable(lemon
     src/volume.cpp
     src/mic.cpp
     src/layout.cpp
+    src/config.cpp
 )
 
 # Include directories for system libraries

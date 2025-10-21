@@ -18,42 +18,38 @@ void Mic::monitor_mic_changes() {
     snd_mixer_elem_t *elem = nullptr;
     int err;
 
-    // Initialize the mixer
-    if ((err = snd_mixer_open(&mixer, 0)) < 0) {
-        std::cerr << "Failed to open mixer: " << snd_strerror(err) << std::endl;
+    // Retry up to 10 times with 300ms delay for PipeWire/ALSA to initialize
+    for (int i = 0; i < 10; ++i) {
+        if ((err = snd_mixer_open(&mixer, 0)) == 0 &&
+            (err = snd_mixer_attach(mixer, "default")) == 0 &&
+            (err = snd_mixer_selem_register(mixer, NULL, NULL)) == 0 &&
+            (err = snd_mixer_load(mixer)) == 0) {
+            break; // success
+        }
+
+        std::cerr << "Mic mixer init failed (" << snd_strerror(err)
+                  << "), retrying...\n";
+        if (mixer) snd_mixer_close(mixer);
+        mixer = nullptr;
+        usleep(300000); // wait 300ms before retry
+    }
+
+    if (!mixer) {
+        std::cerr << "Failed to initialize mic mixer after retries\n";
         return;
     }
 
-    // Attach the mixer to the default sound card
-    if ((err = snd_mixer_attach(mixer, "default")) < 0) {
-        std::cerr << "Failed to attach mixer: " << snd_strerror(err) << std::endl;
-        snd_mixer_close(mixer);
-        return;
-    }
-
-    // Register mixer
-    if ((err = snd_mixer_selem_register(mixer, NULL, NULL)) < 0) {
-        std::cerr << "Failed to register mixer: " << snd_strerror(err) << std::endl;
-        snd_mixer_close(mixer);
-        return;
-    }
-
-    // Load mixer elements
-    if ((err = snd_mixer_load(mixer)) < 0) {
-        std::cerr << "Failed to load mixer elements: " << snd_strerror(err) << std::endl;
-        snd_mixer_close(mixer);
-        return;
-    }
-
-    // Find the Capture mixer element
+    // Find the Capture element
     snd_mixer_selem_id_t *sid;
     snd_mixer_selem_id_alloca(&sid);
     snd_mixer_selem_id_set_index(sid, 0);
     snd_mixer_selem_id_set_name(sid, "Capture");
     elem = snd_mixer_find_selem(mixer, sid);
     if (!elem) {
-        std::cerr << "Failed to find Capture element" << std::endl;
+        std::cerr << "Failed to find Capture element, retrying fallback...\n";
         snd_mixer_close(mixer);
+        sleep(1);
+        monitor_mic_changes(); // try again recursively once
         return;
     }
 

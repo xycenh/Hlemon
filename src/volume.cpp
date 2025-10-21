@@ -18,26 +18,24 @@ void Volume::monitor_volume_changes() {
     snd_mixer_elem_t *elem = nullptr;
     int err;
 
-    if ((err = snd_mixer_open(&mixer, 0)) < 0) {
-        std::cerr << "Failed to open mixer: " << snd_strerror(err) << std::endl;
-        return;
+    // Retry up to 10 times, 300ms apart
+    for (int i = 0; i < 10; ++i) {
+        if ((err = snd_mixer_open(&mixer, 0)) == 0 &&
+            (err = snd_mixer_attach(mixer, "default")) == 0 &&
+            (err = snd_mixer_selem_register(mixer, NULL, NULL)) == 0 &&
+            (err = snd_mixer_load(mixer)) == 0) {
+            break; // success
+        }
+
+        std::cerr << "Mixer init failed (" << snd_strerror(err)
+                  << "), retrying...\n";
+        if (mixer) snd_mixer_close(mixer);
+        mixer = nullptr;
+        usleep(300000); // wait 300ms
     }
 
-    if ((err = snd_mixer_attach(mixer, "default")) < 0) {
-        std::cerr << "Failed to attach mixer: " << snd_strerror(err) << std::endl;
-        snd_mixer_close(mixer);
-        return;
-    }
-
-    if ((err = snd_mixer_selem_register(mixer, NULL, NULL)) < 0) {
-        std::cerr << "Failed to register mixer: " << snd_strerror(err) << std::endl;
-        snd_mixer_close(mixer);
-        return;
-    }
-
-    if ((err = snd_mixer_load(mixer)) < 0) {
-        std::cerr << "Failed to load mixer elements: " << snd_strerror(err) << std::endl;
-        snd_mixer_close(mixer);
+    if (!mixer) {
+        std::cerr << "Failed to initialize mixer after retries\n";
         return;
     }
 
@@ -47,8 +45,10 @@ void Volume::monitor_volume_changes() {
     snd_mixer_selem_id_set_name(sid, "Master");
     elem = snd_mixer_find_selem(mixer, sid);
     if (!elem) {
-        std::cerr << "Failed to find Master element" << std::endl;
+        std::cerr << "Failed to find Master element, retrying fallback...\n";
         snd_mixer_close(mixer);
+        sleep(1);
+        monitor_volume_changes(); // try again recursively once
         return;
     }
 

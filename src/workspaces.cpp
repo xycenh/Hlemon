@@ -17,8 +17,8 @@ std::vector<std::string> Workspaces::shownWorkspaces = {};
 std::vector<std::string> Workspaces::windowsInWorkspace = {};
 
 Workspaces::Workspaces() {
-    // exec();
-    Xsession xsession;
+    exec();
+    // Xsession xsession;
 }
 
 Xsession::Xsession() {
@@ -465,8 +465,8 @@ void Workspaces::checkWindows(const char &status,const std::string &workspace) {
     window_ids.push_back(windows_id.substr(pos_1));
 
 
-    for (const auto& id : window_ids)
-        std::cout << id << std::endl;
+    // for (const auto& id : window_ids)
+    //     std::cout << id << std::endl;
 
     std::vector<std::string> window_classes;
     
@@ -496,8 +496,8 @@ void Workspaces::checkWindows(const char &status,const std::string &workspace) {
 
     for (size_t i = 0; i < window_ids.size(); i++) {
         if (focused_window_id == window_ids[i])
-            windowsInWorkspace.push_back("%{B" + focusedColor + "}%{A3:bspc node " + window_ids[i] + " -c:}%{O10}" + truncateString(window_classes[i]) + "%{O10}%{B-}");
-        else windowsInWorkspace.push_back("%{A:bspc node -f " + window_ids[i] + ":}%{A3:bspc node " + window_ids[i] + " -c:}%{O10}" + truncateString(window_classes[i]) + "%{O10}%{B-}%{A}");
+            windowsInWorkspace.push_back("%{A3:bspc node " + window_ids[i] + " -c:}%{B" + focusedColor + "}%{O10}" + truncateString(window_classes[i]) + "%{O10}%{B-}%{A}");
+        else windowsInWorkspace.push_back("%{A:bspc node -f " + window_ids[i] + ":}%{A3:bspc node " + window_ids[i] + " -c:}%{O10}" + truncateString(window_classes[i]) + "%{O10}%{B-}%{A}%{A}");
 
     }
 }
@@ -507,7 +507,8 @@ std::string Workspaces::getWindows() {
     for (const std::string& ws : windowsInWorkspace) {
         result += ws ;
     }
-    if (result != "") return " %{F#7f849c}|%{F-} " + result;
+    // if (result != "") return " %{F#7f849c}|%{F-} " + result;
+    if (result != "") return " " + result;
     return result;
 }
 

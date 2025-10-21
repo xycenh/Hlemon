@@ -51,6 +51,9 @@ Keyboard::Keyboard() {
         if (tmp) XFree(tmp);
     }
 
+    // Refresh keyboard state after layouts are known
+    XkbGetState(dpy, XkbUseCoreKbd, &state);
+
     {
         std::lock_guard<std::mutex> lock(layoutMutex);
         currentLayout = layout_from_group(state.group);
