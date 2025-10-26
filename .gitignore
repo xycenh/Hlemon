@@ -1,33 +1,5 @@
-# Build directories
-/build/
+#  build directory
+build/
 CMakeCache.txt
-CMakeFiles/
-*.cmake
-Makefile
-cmake_install.cmake
-compile_commands.json
-*.o
-*.a
-*.so
-*.d
-
-# IDEs and editors
-.vscode/
-.idea/
-*.swp
-*.swo
-*.bak
-*.tmp
-
-# OS-Specific Files
-.DS_Store
-
-# Linux
-*~
-
-# Logs and Temporary Files
-*.log
-*.tmp
-
 
 .cache/
